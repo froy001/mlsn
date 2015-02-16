@@ -21,6 +21,9 @@ def gradientDescentMulti(X,y,theta,alpha,num_iters):
         J_history.append(computeCostMulti(X,y,theta))
     return (theta,J_history)
 
+def normalEqn(X,y):
+    return np.linalg.solve(X.T*X,X.T*y)
+
 # Part 1: Feature Normalization
 f = open('ex1data2.txt')
 X = []
@@ -31,7 +34,9 @@ for line in f:
     y.append(float(data[2]))
 
 X = np.matrix(X)
+Xcopy = X
 y = np.matrix([[item] for item in y])
+ycopy = y
 
 a1 = featureNormalize(X)
 
@@ -44,7 +49,7 @@ X = np.c_[np.ones(len(X)),X]
 # Part 2: Gradient descent
 
 alpha = 1
-num_iters = 200
+num_iters = 50
 
 theta = np.zeros((3,1))
 
@@ -69,7 +74,24 @@ br = 3
 price = np.c_[np.ones(1),(np.matrix([ar,br])-mu)/sigma]*theta
 
 print 'Predicted price of a',ar,'sq-ft,',br,'house (using gradient descent):'
+print price,'\n'
+
+# Part 3: Normal equation
+
+y = ycopy
+
+X = np.c_[np.ones(len(Xcopy)),Xcopy]
+
+theta = normalEqn(X,y)
+
+print 'Theta computed from normal equation:'
+print theta
+
+price = np.c_[np.ones(1),np.matrix([ar,br])]*theta
+
+print 'Predicted price of a',ar,'sq-ft,',br,'house (normal equation):'
 print price
+
 
 plt.show()
 
