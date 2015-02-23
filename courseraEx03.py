@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
-import matplotlib.axes as ax
 
 def displayData(X):
     # python translation of displayData.m from coursera
@@ -52,7 +51,9 @@ def gradientReg(theta,X,y,lamb):
 def hessianReg(theta,X,lamb):
     sigXbyT = sigmoid(X*theta)
     H = X.T*np.diag(np.sqrt(np.multiply(sigXbyT,1-sigXbyT)))
-    return (np.dot(H,H.T)+lamb*np.matrix(np.eye(X.shape[1])))/X.shape[0]
+    Htheta = np.matrix(np.eye(X.shape[1]))
+    Htheta[0][0] = 0
+    return (np.dot(H,H.T)+lamb*Htheta)/X.shape[0]
 
 def newtonbt(theta,X,y,lamb,alpha,beta,iter,tol):
     # newtonbt: Newton's method with backtracking line search
