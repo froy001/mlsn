@@ -3,6 +3,74 @@ import scipy.io as sio
 import matplotlib.pyplot as plt
 import matplotlib.axes as ax
 
+def cgbt2(theta,X,y,input_layer_size,hidden_layer_size,num_labels,lamb,alpha,beta,iter,tol):
+    # cgbt2: Conjugate gradient descent method with backtracking line search
+    # Input:
+        # theta: Initial value
+        # X: Training data (input)
+        # y: Training data (output)
+        # input_layer_size / hidden_layer_size / num_labels: As defined in neural network
+        # lamb: Regularization variable
+        # alpha: Parameter for line search, denoting the cost function will be descreased by 100xalpha percent
+        # beta: Parameter for line search, denoting the "step length" t will be multiplied by beta
+        # iter: Maximum number of iterations
+        # tol: The procedure will break if the square of the Newton decrement is less than the threshold tol
+
+    # Initialize the gradient
+    dxPrev = -nnGrad(theta,input_layer_size,hidden_layer_size,num_labels,X,y,lamb)
+    snPrev = dxPrev
+    theta = np.matrix(theta).T
+    # Iteration
+    for i in range(iter):
+        J,grad = nnCostFunction(theta,input_layer_size,hidden_layer_size,num_labels,X,y,lamb)
+        dx = -grad
+        if dx.T*dx < tol:
+            print 'Terminated due to stopping condition with iteration number',i
+            return theta
+        # betaPR since beta is already used as backtracking variable
+        # Polak-Ribiere formula
+        betaPR = np.max((0,(dx.T*(dx-dxPrev))/(dxPrev.T*dxPrev)))
+        # Search direction
+        sn = np.array(dx+snPrev*betaPR)
+        # Backtracking
+        t = 1
+        costNew = nnCost(theta+t*sn,input_layer_size,hidden_layer_size,num_labels,X,y,lamb)
+        alphaGradSn = alpha*(grad.T*sn)
+        while costNew > J+t*alphaGradSn or np.isnan(costNew):
+            t = beta*t
+            costNew = nnCost(theta+t*sn,input_layer_size,hidden_layer_size,num_labels,X,y,lamb)
+
+        tRight = t*2
+        tTemp = t
+        while tRight-t > 1e-3: # Search right-hand side
+            costRight = nnCost(theta+tRight*sn,input_layer_size,hidden_layer_size,num_labels,X,y,lamb)
+            if costRight > costNew:
+                tRight = (t+tRight)/2
+            else:
+                t = tRight
+                tRight = 2*t
+                costNew = costRight
+
+        if t == tTemp:
+            tLeft = t/2.0
+            while t-tLeft > 1e-3: # Search left-hand side
+                costLeft = nnCost(theta+tLeft*sn,input_layer_size,hidden_layer_size,num_labels,X,y,lamb)
+                if costLeft > costNew:
+                    tLeft = (t+tLeft)/2
+                else:
+                    t = tLeft
+                    tLeft = t/2
+                    costNew = costLeft
+
+        # Update
+        theta += t*sn
+        snPrev = sn
+        dxPrev = dx
+        print 'Iteration',i+1,' | Cost:',costNew
+
+    return theta
+
+    
 def cgbt(theta,X,y,input_layer_size,hidden_layer_size,num_labels,lamb,alpha,beta,iter,tol):
     # cgbt: Conjugate gradient descent method with backtracking line search
     # Input:
@@ -46,7 +114,7 @@ def cgbt(theta,X,y,input_layer_size,hidden_layer_size,num_labels,lamb,alpha,beta
         print 'Iteration',i+1,' | Cost:',costNew
 
     return theta
-    
+
     
 def displayData(X,nameFig):
     # python translation of displayData.m from coursera
