@@ -64,7 +64,8 @@ print 'Cost at (fixed) debugging parameters (lambda =',lamb,'):',debug_J[0],'\n'
 
 # Part 9: Training NN
 lamb = 1
-Theta = cgbt(initial_nn_params,X,y,input_layer_size,hidden_layer_size,num_labels,lamb,0.25,0.5,500,1e-8)
+#Theta = cgbt(initial_nn_params,X,y,input_layer_size,hidden_layer_size,num_labels,lamb,0.25,0.5,500,1e-8)
+Theta = cgbt2(initial_nn_params,X,y,input_layer_size,hidden_layer_size,num_labels,lamb,0.25,0.5,50,1e-8)
 
 Theta1 = np.matrix(np.reshape(Theta[:hidden_layer_size*(input_layer_size+1)],(hidden_layer_size,input_layer_size+1),order='F'))
 Theta2 = np.matrix(np.reshape(Theta[hidden_layer_size*(input_layer_size+1):],(num_labels,hidden_layer_size+1),order='F'))
